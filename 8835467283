@@ -1,12 +1,12 @@
 --// UserSettings
---// UserSettings
 getgenv().settings = { -- Global table for the settings
-    Enabled = false, --  availability
+    Enabled = true, --  availability
     Hitbox = 'Head', -- The desired  target part
     Keybind = '', -- The desired input to begin 
     TeamCheckEnabled = false, -- Whether to skip targeting players on the same team
     FOVRadius = 150, -- FOV size
-    FovShow = false
+    fovs = false,
+    Smooth = 1
 }
 
 --// Variables
@@ -21,7 +21,7 @@ local Storage = {} -- An empty table to assist with the targeting later on
 local FOV = Drawing.new('Circle') -- Creating the FOV circle
 
 do --// FOV properties, using do end is not needed whatsoever
-    FOV.Visible = settings.FovShow
+    FOV.Visible = settings.fovs
 
     UserInputService.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement then
@@ -29,9 +29,9 @@ do --// FOV properties, using do end is not needed whatsoever
         end
     end)
 
-    FOV.Thickness = 1
+    FOV.Thickness = 2
     FOV.Color = Color3.new(255, 128, 128)
-    
+ --   FOV.Transparency = settings.fovs
 end
 
 RunService.PostSimulation:Connect(function() -- Starting our Heartbeat/PostSimulation for the targeting
@@ -40,7 +40,8 @@ RunService.PostSimulation:Connect(function() -- Starting our Heartbeat/PostSimul
     Storage.Target = nil -- Resetting our target in order to get a new one
     Storage.TargetDistance = settings.FOVRadius -- Setting the default distance to ensure we do not target anybody outside of the FOV's radius
     FOV.Radius = settings.FOVRadius -- Consistently setting the radius in case it is changed in the settings
-
+ FOV.Visible = settings.fovs
+ 
  for i, player in next, Players:GetChildren() do -- Looping through Players:GetChildren() (game:GetService('Players')) for the current players in the game
 
     local Humanoid = player.Character and player.Character:FindFirstChildWhichIsA('Humanoid') -- Variable checking for the Humanoid
@@ -58,13 +59,9 @@ RunService.PostSimulation:Connect(function() -- Starting our Heartbeat/PostSimul
         continue
     end
 
+    -- new code addednd of new code
 
-
-    -- rest of the code
-
-
-
-        local ScreenPosition, ScreenVisible = CurrentCamera:WorldToViewportPoint(HumanoidRootPart.Position) -- Getting the screenposition of our targets humanoidrootpart
+        local ScreenPosition, ScreenVisible = CurrentCamera:WorldToViewportPoint(HumanoidRootPart.Position) -- Getting the screenposition of our targets humanoid
         ScreenPosition = Vector2.new(ScreenPosition.X, ScreenPosition.Y) -- wtvp gives a vector3, x being x coordinate on the screen, y being y coordinate on the screen, z being depth, we dont need the depth so we will convert it to a vector2
         local MouseDistance = (MousePosition - ScreenPosition).magnitude -- Getting our Distance via subtracting our mouseposition by the targets screenposition and then measuring it by magnitude
 
@@ -85,7 +82,7 @@ RunService.PostSimulation:Connect(function() -- Starting our Heartbeat/PostSimul
     local TargetPartPosition = CurrentCamera:WorldToViewportPoint(HitPart.Position) -- getting the worldtoviewportpoint of our hitpart position
     local RelativeMousePosition = Vector2.new(TargetPartPosition.X, TargetPartPosition.Y) - MousePosition -- Converting TargetPartPosition into a vector 2, then subtracting it by our mouse position, to get the relative position which is how much we need to move our mouse
 
-    mousemoverel(RelativeMousePosition.X * 1, RelativeMousePosition.Y * 1) -- Moving our mouse to the relative position of our targets part, and then multiplying it by a sensitivity value
+    mousemoverel(RelativeMousePosition.X * settings.Smooth, RelativeMousePosition.Y * settings.Smooth) -- Moving our mouse to the relative position of our targets part, and then multiplying it by a sensitivity value
 end
     end
 end)
