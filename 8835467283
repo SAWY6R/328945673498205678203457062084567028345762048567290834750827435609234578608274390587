@@ -1,0 +1,89 @@
+--// UserSettings
+--// UserSettings
+getgenv().settings = { -- Global table for the settings
+    Enabled = true, --  availability
+    Hitbox = 'Head', -- The desired  target part
+    Keybind = '', -- The desired input to begin 
+    TeamCheckEnabled = true, -- Whether to skip targeting players on the same team
+    FOVRadius = 150 -- FOV size
+}
+
+--// Variables
+local Players = game:GetService('Players') -- Defining Players to keep a clean surface
+local RunService = game:GetService('RunService') -- Defining RunService to aid in the use of PreRenders, PostSimulations
+local UserInputService = game:GetService('UserInputService') -- Defining UserInputService to assist with inputs
+
+local LocalPlayer = Players.LocalPlayer -- LocalPlayer variable
+local CurrentCamera = workspace.CurrentCamera -- Defining this is useful later on for Worldtoviewportpoints
+
+local Storage = {} -- An empty table to assist with the targeting later on
+local FOV = Drawing.new('Circle') -- Creating the FOV circle
+
+do --// FOV properties, using do end is not needed whatsoever
+    FOV.Visible = true
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            FOV.Position = UserInputService:GetMouseLocation()
+        end
+    end)
+
+    FOV.Thickness = 2
+    FOV.Color = Color3.new(255, 128, 128)
+end
+
+RunService.PostSimulation:Connect(function() -- Starting our Heartbeat/PostSimulation for the targeting
+
+    local MousePosition = UserInputService:GetMouseLocation() -- Actively getting the mouse location with the use of UserInputService
+    Storage.Target = nil -- Resetting our target in order to get a new one
+    Storage.TargetDistance = settings.FOVRadius -- Setting the default distance to ensure we do not target anybody outside of the FOV's radius
+    FOV.Radius = settings.FOVRadius -- Consistently setting the radius in case it is changed in the settings
+
+ for i, player in next, Players:GetChildren() do -- Looping through Players:GetChildren() (game:GetService('Players')) for the current players in the game
+
+    local Humanoid = player.Character and player.Character:FindFirstChildWhichIsA('Humanoid') -- Variable checking for the Humanoid
+    local HumanoidRootPart = player.Character and player.Character:FindFirstChild('HumanoidRootPart') -- Variable checking for the HumanoidRootPart
+
+    if not Humanoid or not HumanoidRootPart or player == LocalPlayer then -- skips this player and continues to next iteration (next player to check) if not HumanoidRootPart or Humanoid or the player is LocalPlayer
+        continue
+    end
+
+    if settings.TeamCheckEnabled and player.Team == LocalPlayer.Team then -- skip this player and continue to next iteration if TeamCheckEnabled is true and the player is on the same team as the LocalPlayer
+        continue
+    end
+
+    if Humanoid.Health <= 0 then -- Checking if the targets health is 0 or below, if it is then we continue
+        continue
+    end
+
+
+
+    -- rest of the code
+
+
+
+        local ScreenPosition, ScreenVisible = CurrentCamera:WorldToViewportPoint(HumanoidRootPart.Position) -- Getting the screenposition of our targets humanoidrootpart
+        ScreenPosition = Vector2.new(ScreenPosition.X, ScreenPosition.Y) -- wtvp gives a vector3, x being x coordinate on the screen, y being y coordinate on the screen, z being depth, we dont need the depth so we will convert it to a vector2
+        local MouseDistance = (MousePosition - ScreenPosition).magnitude -- Getting our Distance via subtracting our mouseposition by the targets screenposition and then measuring it by magnitude
+
+        if not ScreenVisible then -- if the target's humanoidrootpart is not on the screen it will continue to the next iteration (next player)
+            continue
+        end
+
+        if MouseDistance < Storage.TargetDistance then -- Checking if they are in the FOV
+            Storage.Target = player -- Setting target to the player if they are
+            Storage.TargetDistance = MouseDistance -- Setting their distance to our mouse distance
+        end
+    end
+
+    if Storage.Target ~= nil then
+        local HitPart = Storage.Target.Character:FindFirstChild(settings.Hitbox) -- Finding our desired hitbox via findfirstchild on a character and then putting it inside of a variable
+
+        if UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) and settings.Enabled then -- Checking if the right mouse button is down and if the script is enabled
+    local TargetPartPosition = CurrentCamera:WorldToViewportPoint(HitPart.Position) -- getting the worldtoviewportpoint of our hitpart position
+    local RelativeMousePosition = Vector2.new(TargetPartPosition.X, TargetPartPosition.Y) - MousePosition -- Converting TargetPartPosition into a vector 2, then subtracting it by our mouse position, to get the relative position which is how much we need to move our mouse
+
+    mousemoverel(RelativeMousePosition.X * 1, RelativeMousePosition.Y * 1) -- Moving our mouse to the relative position of our targets part, and then multiplying it by a sensitivity value
+end
+    end
+end)
