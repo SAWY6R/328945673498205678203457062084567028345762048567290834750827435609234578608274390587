@@ -5,7 +5,7 @@ getgenv().settings = { -- Global table for the settings
     Hitbox = 'Head', -- The desired  target part
     Keybind = '', -- The desired input to begin 
     TeamCheckEnabled = false, -- Whether to skip targeting players on the same team
-    FOVRadius = 150 -- FOV size
+    FOVRadius = 150, -- FOV size
     FovShow = false
 }
 
