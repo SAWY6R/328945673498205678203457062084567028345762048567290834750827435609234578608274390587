@@ -1,4 +1,5 @@
 --// UserSettings
+_G.Smoothness = 0.20016
 getgenv().settings = { -- Global table for the settings
     Enabled = true, --  availability
     Hitbox = 'Head', -- The desired  target part
@@ -6,7 +7,7 @@ getgenv().settings = { -- Global table for the settings
     TeamCheckEnabled = false, -- Whether to skip targeting players on the same team
     FOVRadius = 150, -- FOV size
     fovs = false,
-    Smooth = 1
+    
 }
 
 --// Variables
@@ -82,7 +83,7 @@ RunService.PostSimulation:Connect(function() -- Starting our Heartbeat/PostSimul
     local TargetPartPosition = CurrentCamera:WorldToViewportPoint(HitPart.Position) -- getting the worldtoviewportpoint of our hitpart position
     local RelativeMousePosition = Vector2.new(TargetPartPosition.X, TargetPartPosition.Y) - MousePosition -- Converting TargetPartPosition into a vector 2, then subtracting it by our mouse position, to get the relative position which is how much we need to move our mouse
 
-    mousemoverel(RelativeMousePosition.X * settings.Smooth, RelativeMousePosition.Y * settings.Smooth) -- Moving our mouse to the relative position of our targets part, and then multiplying it by a sensitivity value
+    mousemoverel(RelativeMousePosition.X * _G.Smoothness, RelativeMousePosition.Y * _G.Smoothness) -- Moving our mouse to the relative position of our targets part, and then multiplying it by a sensitivity value
 end
     end
 end)
