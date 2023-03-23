@@ -1,11 +1,12 @@
 --// UserSettings
 --// UserSettings
 getgenv().settings = { -- Global table for the settings
-    Enabled = true, --  availability
+    Enabled = false, --  availability
     Hitbox = 'Head', -- The desired  target part
     Keybind = '', -- The desired input to begin 
-    TeamCheckEnabled = true, -- Whether to skip targeting players on the same team
+    TeamCheckEnabled = false, -- Whether to skip targeting players on the same team
     FOVRadius = 150 -- FOV size
+    FovShow = false
 }
 
 --// Variables
@@ -20,7 +21,7 @@ local Storage = {} -- An empty table to assist with the targeting later on
 local FOV = Drawing.new('Circle') -- Creating the FOV circle
 
 do --// FOV properties, using do end is not needed whatsoever
-    FOV.Visible = true
+    FOV.Visible = settings.FovShow
 
     UserInputService.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement then
@@ -28,8 +29,9 @@ do --// FOV properties, using do end is not needed whatsoever
         end
     end)
 
-    FOV.Thickness = 2
+    FOV.Thickness = 1
     FOV.Color = Color3.new(255, 128, 128)
+    
 end
 
 RunService.PostSimulation:Connect(function() -- Starting our Heartbeat/PostSimulation for the targeting
